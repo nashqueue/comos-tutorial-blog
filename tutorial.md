@@ -697,7 +697,7 @@ func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *r
 
 3. Now that you've modified the file with the two updates, now it's safe to save the file. 
 
-## Use the CLI to create a post
+## Play with your Blog Chain - Create a Post
 
 Now that you have implemented logic for creating and querying posts, you can interact with your blog chain using the command line. The blog chain binary is `blogd`.
 
@@ -707,17 +707,18 @@ First, start the chain on your development machine by running the following comm
 ignite chain serve
 ```
 
-The binary is built by the `ignite chain serve` command bit it can also be built by running:
-
-```bash
-ignite chain build
-```
-
 To create a post at the command line:
 
 ```bash
 blogd tx blog create-post foo bar --from alice
 ```
+where:
+
+- blog is the module name
+- create-post is the message name
+- foo is the title
+- bar is the body
+- alice is the account that creates the post
 
 The transaction is output to the terminal. You are prompted to confirm the transaction:
 
@@ -728,9 +729,9 @@ confirm transaction before signing and broadcasting [y/N]: y
 
 Type `y` to sign and broadcast the transaction.
 
-Congratulations, you built a chain binary and used the `blogd` binary CLI to create a blog post.
+Congratulations, you used the `blogd` binary CLI to create a blog post.
 
-## Use the CLI to query posts
+## Use the CLI to Query Posts
 
 To query the list of all on-chain posts:
 
@@ -743,13 +744,110 @@ The result:
 ```bash
 Post:
 - body: bar
-  creator: cosmos1ctxp3pfdtr3sw9udz2ptuh59ce9z0eaa2zvv6w
+  creator: cosmos1a8chns8ay6vqfrgnq54cg7uzu8rlu2hk2uv06e
+  downvotes: "0"
   id: "0"
   title: foo
+  upvotes: "0"
 pagination:
   next_key: null
   total: "1"
 ```
+
+## Use the CLI to Update a Post and Query the Result
+
+To update a post at the command line use:
+
+```bash
+blogd tx blog update-post 0 newbody --from alice
+```
+
+where:
+
+- blog is the module name
+- update-post is the message name
+- 0 is the index of the post that gets the body changed 
+- newbody is the new body
+- alice is the account that updates the post. If bob tries to update a post from alice an error occurs. 
+
+The transaction is output to the terminal. You are prompted to confirm the transaction:
+
+```bash
+{"body":{"messages":[{"@type":"/blog.blog.MsgUpdatePost","creator":"cosmos1a8chns8ay6vqfrgnq54cg7uzu8rlu2hk2uv06e","index":"0","body":"newbody"}],"memo":"","timeout_height":"0","extension_options":[],"non_critical_extension_options":[]},"auth_info":{"signer_infos":[],"fee":{"amount":[],"gas_limit":"200000","payer":"","granter":""}},"signatures":[]}
+
+confirm transaction before signing and broadcasting [y/N]: 
+```
+Type `y` to sign and broadcast the transaction.
+
+Query the list of all on-chain posts to see the updated body:
+
+```bash
+blogd q blog posts
+```
+
+The result:
+
+```
+Post:
+- body: newbody
+  creator: cosmos1a8chns8ay6vqfrgnq54cg7uzu8rlu2hk2uv06e
+  downvotes: "0"
+  id: "0"
+  title: foo
+  upvotes: "0"
+pagination:
+  next_key: null
+  total: "1"
+```
+Congratulations, you just used the `blogd` binary CLI to update a blog post and see the result with a query.
+
+## Use the CLI to Vote on a Post and Query the Result
+
+To vote on a post at the command line use:
+
+```bash
+blogd tx blog vote-on-post 0 1 2 --from bob
+```
+
+where:
+
+- blog is the module name
+- vote-on-post is the message name
+- 0 is the index of the post that gets the body changed
+- 1 is the number of upvotes
+- 2 is the number of downvote
+- bob is the account that votes on the post  
+
+The transaction is output to the terminal. You are prompted to confirm the transaction:
+
+```bash
+{"body":{"messages":[{"@type":"/blog.blog.MsgVoteOnPost","creator":"cosmos1ww26u0md05sux2gvtznkurrw4ywrc0r06sqscq","index":"0","upvotes":"1","downvotes":"2"}],"memo":"","timeout_height":"0","extension_options":[],"non_critical_extension_options":[]},"auth_info":{"signer_infos":[],"fee":{"amount":[],"gas_limit":"200000","payer":"","granter":""}},"signatures":[]}
+
+confirm transaction before signing and broadcasting [y/N]:
+```
+Type `y` to sign and broadcast the transaction.
+
+Query the list of all on-chain posts to see the updated votes:
+
+```bash
+blogd q blog posts
+```
+
+The result:
+
+```
+Post:
+- body: newbody
+  creator: cosmos1a8chns8ay6vqfrgnq54cg7uzu8rlu2hk2uv06e
+  downvotes: "2"
+  id: "0"
+  title: foo
+  upvotes: "1"
+pagination:
+  next_key: null
+  total: "1"
+```
+Congratulations, you just used the `blogd` binary CLI to vote on a blog post and see the result with a query.
 
 ## Conclusion
 
@@ -758,6 +856,7 @@ Congratulations. You have built a blog blockchain!
 You have successfully completed these steps:
 
 * Write blog posts to your chain
+* Update and vote on blog posts
 * Read from blog posts
 * Scaffold a Cosmos SDK message
 * Define new types in protocol buffer files
