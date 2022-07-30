@@ -13,9 +13,11 @@ func (k msgServer) CreatePost(goCtx context.Context, msg *types.MsgCreatePost) (
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	// Create variable of type Post
 	var post = types.Post{
-		Creator: msg.Creator,
-		Title:   msg.Title,
-		Body:    msg.Body,
+		Creator:   msg.Creator,
+		Title:     msg.Title,
+		Body:      msg.Body,
+		Upvotes:   0,
+		Downvotes: 0,
 	}
 	// Add a post to the store and get back the ID
 	id := k.AppendPost(ctx, post)

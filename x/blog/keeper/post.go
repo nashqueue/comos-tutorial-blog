@@ -64,8 +64,7 @@ func (k Keeper) GetPost(
 ) (post types.Post, found bool) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), []byte(types.PostKey))
 
-	// Convert the index to byte
-	//byteKey := []byte(index)
+	// Convert the string index to uint64 and then to byte
 	n, err := strconv.ParseUint(index, 10, 64)
 	if err == nil {
 		fmt.Printf("%d of type %T", n, n)
