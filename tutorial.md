@@ -2,6 +2,11 @@
 
 In this tutorial, you create a blockchain with a module that lets you write to and read data from the blockchain. This module implements create, read and update functionalities for a blog-like application. The end user will be able to submit new blog posts and show a list of blog posts on the blockchain. Furthermore will the user be able to upvote and downvote the post. 
 
+This tutorial builds on knowlege and skills developed in the earlier tutorials in the Ignite CLI Developer Tutorials. Before you start this building your nameservice app, we recommend that you complete these foundational tutorials:
+
+- [Install Ignite CLI](../01-install.md)
+- [Hello, World](../02-hello.md)
+
 > The purpose of this tutorial is to guide you through the implementation of a complete feedback loop: submitting data and reading this data back from the blockchain.
 By completing this tutorial, you will learn about:
 
@@ -10,6 +15,7 @@ By completing this tutorial, you will learn about:
 * Implementing keeper methods to write data to the store
 * Reading data from the store and return it as a result of a query
 * Using the blockchain's CLI to broadcast transactions and query the blockchain
+
 
 **Note:** All the functions in this chapter can be scaffolded with a single command but instead you will learn how to add each functionality individually. 
 
@@ -67,7 +73,7 @@ Use the `ignite scaffold message` command to scaffold new messages for your modu
 ignite scaffold message createPost title body
 ```
 
-The [`ignite scaffold message`](https://docs.ignite.com/#ignite-scaffold-message) command accepts the message name (`createPost`) as the first argument and a list of fields (`title` and `body`) as arguments.
+The [`ignite scaffold message`](https://docs.ignite.com/cli#ignite-scaffold-message) command accepts the message name (`createPost`) as the first argument and a list of fields (`title` and `body`) as arguments.
 
 The `message` command has created and modified several files:
 
@@ -88,7 +94,7 @@ create x/blog/types/message_create_post_test.go
 ### Add the updatePost Message
 
 
-To create the `updatePost` for the nameservice module:
+To create the `updatePost` message for the blog module use:
 
 ```bash
 ignite scaffold message updatePost index body
@@ -97,15 +103,15 @@ ignite scaffold message updatePost index body
 where:
 
 - updatePost is the message name
-- index is the post which the user want to change
+- index is the post which the user wants to change
 - body is the new text of the post
 
-This `ignite scaffold message` command modifies and creates the same set of files as the `createPost` message.
+This `ignite scaffold message` command modifies and creates the same set of files as the `ignite scaffold message` command.
 
-### Add the updatePost Message
+### Add the voteOnPost Message
 
 
-To create the `voteOnPost` for the nameservice module:
+To create the `voteOnPost` message for the blog module use:
 
 ```bash
 ignite scaffold message voteOnPost index upvotes downvotes
@@ -118,7 +124,7 @@ where:
 - upvotes is the amount of upvotes the post gets form the user
 - downvotes is the amount of downvotes the post gets form the user
 
-This `ignite scaffold message` command modifies and creates the same set of files as the `createPost` and `updatePost` message.
+This `ignite scaffold message` command modifies and creates the same set of files as the `createPost` and `updatePost` command.
 
 ## Updating the proto file
 
@@ -147,8 +153,8 @@ message MsgVoteOnPost {
 }
 
 message MsgVoteOnPostResponse {
-  uint64 upvotes = 3;
-  uint64 downvotes = 4;
+  uint64 upvotes = 1;
+  uint64 downvotes = 2;
 }
 ```
 
@@ -164,7 +170,7 @@ service Msg {
 }
 ```
 
-Next, look at the `x/blog/handler.go` file. Ignite CLI has added a `case` to the `switch` statement inside the `NewHandler` function. This switch statement is responsible for routing messages and calling specific keeper methods based on the type of the message:
+Next, look at the `x/blog/handler.go` file. Ignite CLI has added three `case` statements to the `switch` statement inside the `NewHandler` function. This switch statement is responsible for routing messages and calling specific keeper methods based on the type of the message:
 
 
 ```go
@@ -189,37 +195,39 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 ```
 
 The `case *types.MsgCreatePost` statement handles messages of type `MsgCreatePost`, calls the `CreatePost` method, and returns back the response.
-The `case *types.MsgUpdatePost` statement handles messages of type `MsgUpdatePost`, calls the `UpdatePost` method, and returns back the response. The `case *types.MsgVoteOnPost` was created on the same principles. 
+The `case *types.MsgUpdatePost` statement handles messages of type `MsgUpdatePost`, calls the `UpdatePost` method, and returns back the response. The `case *types.MsgVoteOnPost` statement handles messages of type `MsgVoteOnPost`, calls the `VoteOnPost` method, and returns back the response.
 
 Every module has a handler function like this to process messages and call keeper methods.
 
-## Define CreatePost logic
+## Define the CreatePost Logic
 
 In the newly scaffolded `x/blog/keeper/msg_server_create_post.go` file, you can see a placeholder implementation of the `CreatePost` function. Right now it does nothing and returns an empty response. For your blog chain, you want the contents of the message (title and body) to be written to the state as a new post.
 
 You need to do two things:
 
-- Create a variable of type `Post` with title and body from the message
+- Create a variable of type `Post` with title and body from the message. Add the initial 0 upvotes and downvotes to the post.
 - Append this `Post` to the store
 
 ```go
 func (k msgServer) CreatePost(goCtx context.Context, msg *types.MsgCreatePost) (*types.MsgCreatePostResponse, error) {
-  // Get the context
-  ctx := sdk.UnwrapSDKContext(goCtx)
-  // Create variable of type Post
-  var post = types.Post{
-     Creator: msg.Creator,
-     Title:   msg.Title,
-     Body:    msg.Body,
-  }
-  // Add a post to the store and get back the ID
-  id := k.AppendPost(ctx, post)
-  // Return the ID of the post
-  return &types.MsgCreatePostResponse{Id: id}, nil
+	// Get the context
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	// Create variable of type Post
+	var post = types.Post{
+		Creator:   msg.Creator,
+		Title:     msg.Title,
+		Body:      msg.Body,
+		Upvotes:   0,
+		Downvotes: 0,
+	}
+	// Add a post to the store and get back the ID
+	id := k.AppendPost(ctx, post)
+	// Return the ID of the post
+	return &types.MsgCreatePostResponse{Id: id}, nil
 }
 ```
 
-## Define Post type and keeper methods
+### Define the Post Type 
 
 Define the `Post` type and keeper methods.
 
@@ -249,7 +257,7 @@ The contents of the `post.proto` file are standard. The file defines:
 
 Continue developing your blog chain.
 
-### Define keeper methods
+### Define Keeper Methods
 
 The next step is to define the `AppendPost` keeper method. 
 
@@ -277,7 +285,7 @@ Your blog is now updated to take these actions when a `Post` message is sent to 
 - Increment the count
 - Return the count
 
-## Write Data to the Store
+### Write Data to the Store
 
 Now, after the `import` section in the `x/blog/keeper/post.go` file, draft the `AppendPost` function. You can add these comments to help you visualize what you do next:
 
@@ -355,10 +363,17 @@ func (k Keeper) AppendPost(ctx sdk.Context, post types.Post) uint64 {
 }
 ```
 
-By following these steps, you have implemented all of the code required to create new posts and store them on-chain. Now, when a transaction that contains a message of type `MsgCreatePost` is broadcast, the message is routed to your blog module.
+
+🎉 Congratulations. By following these steps, you have implemented all of the code required to create new posts and store them on-chain. Now, when a transaction that contains a message of type `MsgCreatePost` is broadcast, the message is routed to your blog module.
 
 - `x/blog/handler.go` calls `k.CreatePost` which in turn calls `AppendPost`
 - `AppendPost` gets the number of posts from the store, adds a post using the count as an ID, increments the count, and returns the ID
+
+Use the `ignite chain build` command to compile your newly implemented keeper. 
+
+´´´
+ignite chain build
+´´´
 
 
 ## Define UpdatePost logic
@@ -373,64 +388,91 @@ You need to do three things:
 
 ```go
 func (k msgServer) UpdatePost(goCtx context.Context, msg *types.MsgUpdatePost) (*types.MsgUpdatePostResponse, error) {
-  //get the context
-  ctx := sdk.UnwrapSDKContext(goCtx)
+	//get the context
+	ctx := sdk.UnwrapSDKContext(goCtx)
 
-  // Check if the value exists
-  post, isFound := k.GetPost(
-    ctx,
-    msg.Index,
-  )
-  if !isFound {
-    return nil, sdkerrors.Wrap(sdkerrors.ErrKeyNotFound, "index not set")
-  }
+	// Check if the value exists
+	post, isFound := k.GetPost(
+		ctx,
+		msg.Index,
+	)
+	if !isFound {
+		return nil, sdkerrors.Wrap(sdkerrors.ErrKeyNotFound, "index not set")
+	}
 
-  // Checks if the the msg creator is the same as the current owner
-  if msg.Creator != post.Creator {
-    return nil, sdkerrors.Wrap(sdkerrors.ErrUnauthorized, "incorrect owner")
-  }
+	// Check if the the msg creator is the same as the current owner
+	if msg.Creator != post.Creator {
+		return nil, sdkerrors.Wrap(sdkerrors.ErrUnauthorized, "incorrect owner")
+	}
 
-  //update the body
-  post.Body = msg.Body
+	//update the body
+	post.Body = msg.Body
 
-  /update the new post
-  k.SetPost(ctx, post)
+	//store the new post
+	k.SetPost(ctx, post)
 
-  return &types.MsgUpdatePostResponse{}, nil
+	return &types.MsgUpdatePostResponse{}, nil
 }
+```
+
+Add `sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"` to the imports, which provides further context and meaning to a failed execution:
+
+```go 
+import (
+    //...
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+)
 ```
 
 ### Write General Setters and Getters for Posts
 
-```go
 First, implement `GetPost` in the `x/blog/keeper/post.go` file: 
 
+```go
 // GetPost returns a post from its index
 func (k Keeper) GetPost(
 	ctx sdk.Context,
 	index string,
 
-) (val types.Post, found bool) {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), []byte(types.PostCountKey))
+) (post types.Post, found bool) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), []byte(types.PostKey))
 
-	// Convert the index to bytes
-	byteKey := []byte(index)
+	// Convert the string index to uint64 and then to byte
+	n, err := strconv.ParseUint(index, 10, 64)
+	if err == nil {
+		fmt.Printf("%d of type %T", n, n)
+	}
+	byteKey := make([]byte, 8)
+	binary.BigEndian.PutUint64(byteKey, n)
 
 	// Get the value of the count
-	b := store.Get(byteKey)
+	postBytes := store.Get(byteKey)
 
-	if b == nil {
-		return val, false
+	//retrun an empty post if the index does not exists
+	if postBytes == nil {
+		return post, false
 	}
 
-	k.cdc.MustUnmarshal(b, &val)
-	return val, true
+	//Unmarshal the bytes of the post
+	k.cdc.MustUnmarshal(postBytes, &post)
+	return post, true
 }
 ```
 
-```go
-Now that `GetPost` returns the correct post in the store at the given index, implement `SetPost`:
+Add `strconv` and `fmt` to the imports at the top of the file, which handles the string conversion and enables printing in the terminal:
 
+```go 
+import (
+    //...
+	"fmt"
+	"strconv"
+)
+```
+
+
+Now that `GetPost` returns the correct post in the store at the given index, implement `SetPost` in the same `x/blog/keeper/post.go` file:
+
+```go
 // SetPost updates a post at its index
 func (k Keeper) SetPost(ctx sdk.Context, post types.Post) {
 	// Get the store
@@ -441,17 +483,23 @@ func (k Keeper) SetPost(ctx sdk.Context, post types.Post) {
 	binary.BigEndian.PutUint64(byteKey, post.Id)
 
 	// Marshal the post into bytes
-	newValue := k.cdc.MustMarshal(&post)
+	postBytes := k.cdc.MustMarshal(&post)
 
 	// Insert the post bytes using post ID as a key
-	store.Set(byteKey, newValue)
+	store.Set(byteKey, postBytes)
 }
 ```
 
-By following these steps, you have implemented all of the code required to update posts and store them on-chain. Now, when a transaction that contains a message of type `MsgUpdatePost` is broadcast, the message is routed to your blog module.
+🎉 Congratulations. By following these steps, you have implemented all of the code required to update posts and store them on-chain. Now, when a transaction that contains a message of type `MsgUpdatePost` is broadcast, the message is routed to your blog module.
 
 - `x/blog/handler.go` calls `k.UpdatePost` which in turn calls `GetPost` and `SetPost`. 
-- `k.UpdatePost` checks if the caller is allowed to change the body and then saves the new body on chain. 
+- `k.UpdatePost` checks if the post exists and if the caller is allowed to change the body. It then saves the new body on chain. 
+
+Use the `ignite chain build` command to compile your newly implemented keeper. 
+
+´´´
+ignite chain build
+´´´
 
 ## Define VoteOnPost Logic
 
@@ -463,6 +511,19 @@ You need to do two things:
 - Add the new upvotes and downvotes on the post
 
 ```go
+package keeper
+
+import (
+	"context"
+	"fmt"
+	"strconv"
+
+	"blog/x/blog/types"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+)
+
 func (k msgServer) VoteOnPost(goCtx context.Context, msg *types.MsgVoteOnPost) (*types.MsgVoteOnPostResponse, error) {
 	//get the context
 	ctx := sdk.UnwrapSDKContext(goCtx)
@@ -476,26 +537,50 @@ func (k msgServer) VoteOnPost(goCtx context.Context, msg *types.MsgVoteOnPost) (
 		return nil, sdkerrors.Wrap(sdkerrors.ErrKeyNotFound, "index not set")
 	}
 
-	//update upvotes and downvotes
-	post.Upvotes += msg.Upvotes
-	post.Downvotes += msg.Downvotes
+	//Convert upvotes and downvotes from string to unit64
+	upvotes, err := strconv.ParseUint(msg.Upvotes, 10, 64)
+	if err == nil {
+		fmt.Printf("%d of type %T", upvotes, upvotes)
+	}
+	downvotes, err := strconv.ParseUint(msg.Downvotes, 10, 64)
+	if err == nil {
+		fmt.Printf("%d of type %T", downvotes, downvotes)
+	}
+
+	//add the new upvotes and downvotes on top of the old ones
+	post.Upvotes += upvotes
+	post.Downvotes += downvotes
 
 	//update the new post
 	k.SetPost(ctx, post)
 
-	return &types.MsgVoteOnPostResponse{post.Upvotes, post.Downvotes}, nil
+	return &types.MsgVoteOnPostResponse{Upvotes: post.Upvotes, Downvotes: post.Downvotes}, nil
 }
 ```
 
-Now that you have added the functionality to create posts and broadcast them to our chain, you can add querying.
+🎉 Congratulations. By following these steps, you have implemented all of the code required to vote on posts. Now, when a transaction that contains a message of type `MsgVoteOnPost` is broadcast, the message is routed to your blog module. You already implemented `GetPost` and `SetPost` in the previous steps. 
+
+- `x/blog/handler.go` calls `k.VoteOnPost` which in turn calls `GetPost` and `SetPost`. 
+- `k.VoteOnPost` checks if the post exists and then adds the votes on chain. 
+
+Use the `ignite chain build` command to compile your newly implemented keeper. 
+
+´´´
+ignite chain build
+´´´
+
 
 ## Display posts
 
-To display posts, scaffold a query:
+Now that you have added the functionality to create posts and broadcast them to our chain, you can add querying.
+To display posts, use the `ignite query message` command to scaffold a new query for your module.
 
 ```bash
 ignite scaffold query posts --response title,body,upvotes,downvotes
 ```
+
+The [`ignite scaffold query`](https://docs.ignite.com/cli#ignite-scaffold-query) command accepts the query name (`posts`) as the first argument and a list of response fields (`title`, `body`, `upvotes` and `downvotes`) as arguments.
+
 The `query` command has created and modified several files:
 
 ```bash

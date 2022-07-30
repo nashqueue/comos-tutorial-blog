@@ -75,10 +75,12 @@ func (k Keeper) GetPost(
 	// Get the value of the count
 	postBytes := store.Get(byteKey)
 
+	//retrun an empty post if the index does not exists
 	if postBytes == nil {
 		return post, false
 	}
 
+	//Unmarshal the bytes of the post
 	k.cdc.MustUnmarshal(postBytes, &post)
 	return post, true
 }

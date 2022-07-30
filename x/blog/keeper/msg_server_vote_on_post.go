@@ -23,6 +23,8 @@ func (k msgServer) VoteOnPost(goCtx context.Context, msg *types.MsgVoteOnPost) (
 	if !isFound {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrKeyNotFound, "index not set")
 	}
+
+	//Convert upvotes and downvotes from string to unit64
 	upvotes, err := strconv.ParseUint(msg.Upvotes, 10, 64)
 	if err == nil {
 		fmt.Printf("%d of type %T", upvotes, upvotes)
@@ -31,7 +33,8 @@ func (k msgServer) VoteOnPost(goCtx context.Context, msg *types.MsgVoteOnPost) (
 	if err == nil {
 		fmt.Printf("%d of type %T", downvotes, downvotes)
 	}
-	//add new upvotes and downvotes
+
+	//add the new upvotes and downvotes on top of the old ones
 	post.Upvotes += upvotes
 	post.Downvotes += downvotes
 
