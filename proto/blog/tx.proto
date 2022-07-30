@@ -9,6 +9,7 @@ option go_package = "blog/x/blog/types";
 service Msg {
       rpc CreatePost(MsgCreatePost) returns (MsgCreatePostResponse);
   rpc UpdatePost(MsgUpdatePost) returns (MsgUpdatePostResponse);
+  rpc VoteOnPost(MsgVoteOnPost) returns (MsgVoteOnPostResponse);
 // this line is used by starport scaffolding # proto/tx/rpc
 }
 
@@ -28,6 +29,16 @@ message MsgUpdatePost {
 }
 
 message MsgUpdatePostResponse {
+}
+
+message MsgVoteOnPost {
+  string creator = 1;
+  string index = 2;
+  string upvotes = 3;
+  string downvotes = 4;
+}
+
+message MsgVoteOnPostResponse {
 }
 
 // this line is used by starport scaffolding # proto/tx/message
