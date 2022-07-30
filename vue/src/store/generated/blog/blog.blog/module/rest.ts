@@ -9,11 +9,20 @@
  * ---------------------------------------------------------------
  */
 
-export type BlogMsgCreatePostResponse = object;
+export interface BlogMsgCreatePostResponse {
+  /** @format uint64 */
+  id?: string;
+}
 
 export type BlogMsgUpdatePostResponse = object;
 
-export type BlogMsgVoteOnPostResponse = object;
+export interface BlogMsgVoteOnPostResponse {
+  /** @format uint64 */
+  upvotes?: string;
+
+  /** @format uint64 */
+  downvotes?: string;
+}
 
 /**
  * Params defines the parameters for the module.

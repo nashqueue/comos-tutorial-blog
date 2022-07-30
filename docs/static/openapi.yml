@@ -30472,10 +30472,21 @@ paths:
 definitions:
   blog.blog.MsgCreatePostResponse:
     type: object
+    properties:
+      id:
+        type: string
+        format: uint64
   blog.blog.MsgUpdatePostResponse:
     type: object
   blog.blog.MsgVoteOnPostResponse:
     type: object
+    properties:
+      upvotes:
+        type: string
+        format: uint64
+      downvotes:
+        type: string
+        format: uint64
   blog.blog.Params:
     type: object
     description: Params defines the parameters for the module.

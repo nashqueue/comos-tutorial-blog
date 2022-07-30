@@ -20,6 +20,7 @@ message MsgCreatePost {
 }
 
 message MsgCreatePostResponse {
+  uint64 id = 1;
 }
 
 message MsgUpdatePost {
@@ -39,6 +40,8 @@ message MsgVoteOnPost {
 }
 
 message MsgVoteOnPostResponse {
+  uint64 upvotes = 1;
+  uint64 downvotes = 2;
 }
 
 // this line is used by starport scaffolding # proto/tx/message
