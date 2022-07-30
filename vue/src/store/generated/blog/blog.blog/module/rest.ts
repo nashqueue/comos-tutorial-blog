@@ -11,6 +11,8 @@
 
 export type BlogMsgCreatePostResponse = object;
 
+export type BlogMsgUpdatePostResponse = object;
+
 /**
  * Params defines the parameters for the module.
  */

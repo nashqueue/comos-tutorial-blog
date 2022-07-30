@@ -30470,6 +30470,10 @@ paths:
       tags:
         - Query
 definitions:
+  blog.blog.MsgCreatePostResponse:
+    type: object
+  blog.blog.MsgUpdatePostResponse:
+    type: object
   blog.blog.Params:
     type: object
     description: Params defines the parameters for the module.

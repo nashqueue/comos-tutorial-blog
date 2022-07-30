@@ -5,10 +5,12 @@ import { SigningStargateClient } from "@cosmjs/stargate";
 import { Registry, OfflineSigner, EncodeObject, DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
 import { Api } from "./rest";
 import { MsgCreatePost } from "./types/blog/tx";
+import { MsgUpdatePost } from "./types/blog/tx";
 
 
 const types = [
   ["/blog.blog.MsgCreatePost", MsgCreatePost],
+  ["/blog.blog.MsgUpdatePost", MsgUpdatePost],
   
 ];
 export const MissingWalletError = new Error("wallet is required");
@@ -42,6 +44,7 @@ const txClient = async (wallet: OfflineSigner, { addr: addr }: TxClientOptions =
   return {
     signAndBroadcast: (msgs: EncodeObject[], { fee, memo }: SignAndBroadcastOptions = {fee: defaultFee, memo: ""}) => client.signAndBroadcast(address, msgs, fee,memo),
     msgCreatePost: (data: MsgCreatePost): EncodeObject => ({ typeUrl: "/blog.blog.MsgCreatePost", value: MsgCreatePost.fromPartial( data ) }),
+    msgUpdatePost: (data: MsgUpdatePost): EncodeObject => ({ typeUrl: "/blog.blog.MsgUpdatePost", value: MsgUpdatePost.fromPartial( data ) }),
     
   };
 };
