@@ -1,8 +1,8 @@
-# Build a blog
+# Build a Blog
 
-In this tutorial, you create a blockchain with a module that lets you write to and read data from the blockchain. This module implements create, read and update functionalities for a blog-like application. The end user will be able to submit new blog posts and show a list of blog posts on the blockchain. Furthermore will the user be able to upvote and downvote the post. 
+In this tutorial, you create a blockchain with a module that lets you write to and read data from the blockchain. This module implements create, read and update functionalities for a blog-like application. The end user will be able to submit new blog posts and show a list of blog posts on the blockchain. Furthermore will the user be able to upvote and downvote the posts. 
 
-This tutorial builds on knowlege and skills developed in the earlier tutorials in the Ignite CLI Developer Tutorials. Before you start this building your nameservice app, we recommend that you complete these foundational tutorials:
+This tutorial builds on knowlege and skills developed in the earlier tutorials in the Ignite CLI Developer Tutorials. Before you start this building your blog chain, we recommend that you complete these foundational tutorials:
 
 - [Install Ignite CLI](../01-install.md)
 - [Hello, World](../02-hello.md)
@@ -27,7 +27,7 @@ This series of blog tutorials is based on a specific version of Ignite CLI, so t
 curl https://get.ignite.com/cli@v0.22.2! | bash
 ```
 
-## Create your blog chain
+## Create your Blog Chain
 
 First, create a new blockchain.
 
@@ -39,13 +39,13 @@ ignite scaffold chain blog
 
 The `blog` directory is created with the default directory structure.
 
-## High-level transaction review
+## High-level Transaction Review
 
 So far, you have learned how to modify proto files to define a new API endpoint and modify a keeper query function to return static data back to the user. Of course, a keeper can do more than return a string of data. Its purpose is to manage access to the state of the blockchain.
 
 You can think of the state as being a collection of key-value stores. Each module is responsible for its own store. Changes to the store are triggered by transactions that are signed and broadcasted by users. Each transaction contains Cosmos SDK messages (not to be confused with proto `message`). When a transaction is processed, each message gets routed to its module. A module has message handlers that process messages. Processing a message can trigger changes in the state.
 
-## Create message types
+## Create Message Types
 
 A Cosmos SDK message contains information that can trigger changes in the state of a blockchain.
 
@@ -58,7 +58,7 @@ Now, you are ready to implement these Cosmos SDK messages to achieve the desired
  - `voteOnPost` 
         Allow useres to upvote and downvote on posts.
 
-### Add the createPost Message
+### Add the CreatePost Message
 
 First, change into the `blog` directory:
 
@@ -91,7 +91,7 @@ create x/blog/types/message_create_post_test.go
 🎉 Created a message `createPost`.
 ```
 
-### Add the updatePost Message
+### Add the UpdatePost Message
 
 
 To create the `updatePost` message for the blog module use:
@@ -106,9 +106,9 @@ where:
 - index is the post which the user wants to change
 - body is the new text of the post
 
-This `ignite scaffold message` command modifies and creates the same set of files as the `ignite scaffold message` command.
+This `ignite scaffold message` command modifies and creates the same set of files as the previous scaffold.
 
-### Add the voteOnPost Message
+### Add the VoteOnPost Message
 
 
 To create the `voteOnPost` message for the blog module use:
@@ -120,13 +120,13 @@ ignite scaffold message voteOnPost index upvotes downvotes
 where:
 
 - voteOnPost is the message name
-- index is the post on which the user want to vote 
+- index is the post on which the user wants to vote 
 - upvotes is the amount of upvotes the post gets form the user
 - downvotes is the amount of downvotes the post gets form the user
 
-This `ignite scaffold message` command modifies and creates the same set of files as the `createPost` and `updatePost` command.
+This `ignite scaffold message` command modifies and creates the same set of files as the previous scaffolds.
 
-## Updating the proto file
+## Updating the Proto File
 
 As always, start with a proto file. Inside the `proto/blog/tx.proto` file, the `MsgCreatePost` message has been created. Edit the file to add the line that defines the `id` for `message MsgCreatePostResponse`:
 
@@ -158,7 +158,7 @@ message MsgVoteOnPostResponse {
 }
 ```
 
-## Review the message code
+## Review the Message Code
 
 In the same file `proto/blog/tx.proto` review the Cosmos SDK message type with proto `message`. The `MsgCreatePost` has three fields: creator, title, and body. Since the purpose of the `MsgCreatePost` message is to create new posts in the store, the only thing the message needs to return is an ID of a created post. The `CreatePost` rpc was already added to the `Msg` service. The same goes for the `UpdatePost` and `VoteOnPost` rpc:
 
@@ -371,7 +371,7 @@ func (k Keeper) AppendPost(ctx sdk.Context, post types.Post) uint64 {
 
 Use the `ignite chain build` command to compile your newly implemented keeper. 
 
-´´´
+´´´bash
 ignite chain build
 ´´´
 
@@ -497,7 +497,7 @@ func (k Keeper) SetPost(ctx sdk.Context, post types.Post) {
 
 Use the `ignite chain build` command to compile your newly implemented keeper. 
 
-´´´
+´´´bash
 ignite chain build
 ´´´
 
@@ -508,7 +508,7 @@ In the newly scaffolded `x/blog/keeper/msg_server_vote_on_post.go` file, you can
 You need to do two things:
 
 - Check if the index already exists.
-- Add the new upvotes and downvotes on the post
+- Add the new upvotes and downvotes to the post
 
 ```go
 package keeper
@@ -565,12 +565,12 @@ func (k msgServer) VoteOnPost(goCtx context.Context, msg *types.MsgVoteOnPost) (
 
 Use the `ignite chain build` command to compile your newly implemented keeper. 
 
-´´´
+´´´bash
 ignite chain build
 ´´´
 
 
-## Display posts
+## Display Posts
 
 Now that you have added the functionality to create posts and broadcast them to our chain, you can add querying.
 To display posts, use the `ignite query message` command to scaffold a new query for your module.
@@ -673,7 +673,7 @@ func (k Keeper) Posts(c context.Context, req *types.QueryPostsRequest) (*types.Q
 }
 ```
 
-## Add gRPC to the module handler
+## Add gRPC to the Module Handler
 
 In the `x/blog/module.go` file:
 
@@ -729,7 +729,7 @@ confirm transaction before signing and broadcasting [y/N]: y
 
 Type `y` to sign and broadcast the transaction.
 
-Congratulations, you used the `blogd` binary CLI to create a blog post.
+🎉Congratulations, you used the `blogd` binary CLI to create a blog post.
 
 ## Use the CLI to Query Posts
 
@@ -767,7 +767,7 @@ where:
 - blog is the module name
 - update-post is the message name
 - 0 is the index of the post that gets the body changed 
-- newbody is the new body
+- newbody is the updated body
 - alice is the account that updates the post. If bob tries to update a post from alice an error occurs. 
 
 The transaction is output to the terminal. You are prompted to confirm the transaction:
@@ -799,7 +799,7 @@ pagination:
   next_key: null
   total: "1"
 ```
-Congratulations, you just used the `blogd` binary CLI to update a blog post and see the result with a query.
+🎉Congratulations, you just used the `blogd` binary CLI to update a blog post and see the result with a query.
 
 ## Use the CLI to Vote on a Post and Query the Result
 
@@ -847,11 +847,11 @@ pagination:
   next_key: null
   total: "1"
 ```
-Congratulations, you just used the `blogd` binary CLI to vote on a blog post and see the result with a query.
+🎉Congratulations, you just used the `blogd` binary CLI to vote on a blog post and see the result with a query.
 
 ## Conclusion
 
-Congratulations. You have built a blog blockchain! 
+🎉🎉🎉Congratulations🎉🎉🎉. You have built a blog blockchain! 
 
 You have successfully completed these steps:
 
